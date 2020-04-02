@@ -1,0 +1,17 @@
+runmode: debug                 # 开发模式, debug, release, test
+addr: 8010                 # HTTP绑定端口
+addr_num: 8
+name: micro              # API Server的名字
+max_ping_count: 10           # pingServer函数try的次数
+db:
+  name: blog
+  host: 127.0.0.1:3306
+  username: root
+  password: 111111
+  charset: utf8mb4
+redis:
+  host: 127.0.0.1
+  port: 6379
+  auth: 
+service_addr: http://127.0.0.1:8500
+service_name: saiMicro
