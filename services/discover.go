@@ -3,12 +3,13 @@ package services
 import (
     "fmt"
 
-	"github.com/micro/go-micro/client/selector"
-    "github.com/micro/go-micro/registry"
-    "github.com/micro/go-plugins/registry/consul"
+	"github.com/micro/go-micro/v2/client/selector"
+    "github.com/micro/go-micro/v2/registry"
+    "github.com/micro/go-plugins/registry/consul/v2"
 	"github.com/spf13/viper"
 )
 
+// 服务发现
 func Discover() {
     consulReg := consul.NewRegistry(
         registry.Addrs(viper.GetString("service_addr")),

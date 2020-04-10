@@ -8,9 +8,10 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	
-	"local.com/13sai/game/config"
-	"local.com/13sai/game/web"
-	"local.com/13sai/game/services"
+	"local.com/13sai/microService/config"
+	// "local.com/13sai/microService/web"
+	"local.com/13sai/microService/services"
+    // "local.com/13sai/microService/grpc"
 )
 
 var (
@@ -25,22 +26,45 @@ func main() {
 		panic(err)
 	}
 
-	// pingServer()
-	// return
+	grpcServer()
 
+	httpServer()
+}
+
+func grpcServer() {
 	num := viper.GetInt("addr_num")
-	port := viper.GetInt("addr")
+	port := viper.GetInt("rpc_addr")
+
 	var wg sync.WaitGroup
 	wg.Add(num)
 	for i := 0; i < num; i++ {
-		web := web.StartHttp()
 		go func (i int) {
-			addr := fmt.Sprintf(":%d", i+port)
-			services.Register(web, addr)
-			// s.Run()
+			services.RegisterGRpc(fmt.Sprintf(":%d",i+port))
 		}(i)
-		// time.Sleep(time.Second*10);
 	}
+
+
+	wg.Wait()
+
+	// pingServer()
+
+	
+}
+
+func httpServer() {
+	num := viper.GetInt("addr_num")
+	// port := viper.GetInt("addr")
+	var wg sync.WaitGroup
+	wg.Add(num)
+	for i := 0; i < num; i++ {
+		// web := web.StartHttp()
+		go func (i int) {
+			// addr := fmt.Sprintf(":%d", i+port)
+			// services.Register(web, addr)
+		}(i)
+	}
+
+	pingServer()
 
 	wg.Wait()
 }
@@ -48,6 +72,7 @@ func main() {
 func pingServer() {
 	time.NewTicker(time.Second)
     for i := 0; i < 10; i++ {
+		time.Sleep(time.Second)
 		services.Discover()
     }
 }

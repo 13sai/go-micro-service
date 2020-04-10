@@ -3,14 +3,26 @@ package services
 import (
 	"fmt"
 	"math/rand"
+	"context"
 
 	"github.com/spf13/viper"
     "github.com/gin-gonic/gin"
-    "github.com/micro/go-micro/registry"
-    "github.com/micro/go-micro/web"
-	"github.com/micro/go-plugins/registry/consul"
+	"github.com/micro/go-micro/v2/registry"
+	"github.com/micro/go-micro/v2/service"
+	gserver "github.com/micro/go-micro/v2/service/grpc"
+
+    "github.com/micro/go-micro/v2/web"
+	"github.com/micro/go-plugins/registry/consul/v2"
+	// "github.com/micro/go-micro/v2/server"
+
+
+	// "github.com/micro/go-micro/server/grpc"
+    // "google.golang.org/grpc"
+	"local.com/13sai/microService/hello"
+	// gDemo "local.com/13sai/microService/grpc"
 )
 
+// 注册服务
 func Register(ginRouter *gin.Engine, addr string) {
 	//新建一个consul注册的地址，也就是我们consul服务启动的机器ip+端口
     consulReg := consul.NewRegistry(
@@ -30,4 +42,37 @@ func Register(ginRouter *gin.Engine, addr string) {
 	// return server
     server.Run()
 	// fmt.Println(addr)
+}
+
+type Server struct {
+    // hello.DemoService
+}
+
+func (t *Server) SayHello(ctx context.Context, req *hello.HelloRequest, rsp *hello.HelloReply) error {
+	rsp.Message = "Hello " + req.Name
+	return nil
+}
+
+func RegisterGRpc(addr string) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	r := consul.NewRegistry(
+        registry.Addrs(viper.GetString("service_addr")),
+	)
+
+	// create GRPC service
+	s := gserver.NewService(
+		service.Name(viper.GetString("service_name")),
+		service.Registry(r),
+		service.AfterStart(func() error {
+			return nil
+		}),
+		service.Context(ctx),
+	)
+	fmt.Println(addr)
+
+	// register test handler
+	hello.RegisterDemoHandler(s.Server(), &Server{})
+	s.Run()
 }

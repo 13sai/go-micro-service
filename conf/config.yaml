@@ -1,6 +1,7 @@
 runmode: debug                 # 开发模式, debug, release, test
-addr: 8010                 # HTTP绑定端口
-addr_num: 8
+addr: 9100                 # HTTP绑定端口
+rpc_addr: 9140
+addr_num: 1
 name: micro              # API Server的名字
 max_ping_count: 10           # pingServer函数try的次数
 db:
@@ -14,4 +15,4 @@ redis:
   port: 6379
   auth: 
 service_addr: http://127.0.0.1:8500
-service_name: saiMicro
+service_name: saiMicroService
