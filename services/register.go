@@ -1,23 +1,24 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
-	"context"
 
-	"github.com/spf13/viper"
-    "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 	"github.com/micro/go-micro/v2/registry"
 	"github.com/micro/go-micro/v2/service"
 	gserver "github.com/micro/go-micro/v2/service/grpc"
+	"github.com/micro/go-micro/v2/transport"
+	"github.com/spf13/viper"
 
-    "github.com/micro/go-micro/v2/web"
+	"github.com/micro/go-micro/v2/web"
 	"github.com/micro/go-plugins/registry/consul/v2"
+
 	// "github.com/micro/go-micro/v2/server"
 
-
 	// "github.com/micro/go-micro/server/grpc"
-    // "google.golang.org/grpc"
+	// "google.golang.org/grpc"
 	"local.com/13sai/microService/hello"
 	// gDemo "local.com/13sai/microService/grpc"
 )
@@ -58,8 +59,16 @@ func RegisterGRpc(addr string) {
 	defer cancel()
 
 	r := consul.NewRegistry(
-        registry.Addrs(viper.GetString("service_addr")),
+    registry.Addrs(viper.GetString("service_addr")),
 	)
+	tr := transport.NewTransport()
+
+	// bind / listen
+	l, err := tr.Listen(addr)
+	if err != nil {
+		fmt.Println("Unexpected error listening %v", err)
+	}
+	defer l.Close()
 
 	// create GRPC service
 	s := gserver.NewService(
@@ -69,6 +78,7 @@ func RegisterGRpc(addr string) {
 			return nil
 		}),
 		service.Context(ctx),
+		service.Transport(tr),
 	)
 	fmt.Println(addr)
 
